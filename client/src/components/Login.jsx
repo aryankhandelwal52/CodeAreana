@@ -5,7 +5,9 @@ export default function Login({ setUser }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
-  const BACKEND_URL = import.meta.env.VITE_BACKEND || "http://localhost:5000";
+  
+  // Use localhost for local testing.
+  const BACKEND_URL = "http://localhost:5000";
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -37,12 +39,33 @@ export default function Login({ setUser }) {
         <h1 className="text-3xl font-bold text-center mb-6 text-indigo-700">CodeArena</h1>
         <h2 className="text-xl font-semibold mb-4 text-center text-gray-600">Sign In</h2>
         <form onSubmit={handleLogin} className="flex flex-col gap-4">
-          <input className="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400" type="email" placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} required />
-          <input className="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400" type="password" placeholder="Password" value={password} onChange={e => setPassword(e.target.value)} required />
-          <button className="bg-indigo-600 text-white p-3 rounded-lg font-bold hover:bg-indigo-700 transition" type="submit">Login</button>
+          <input 
+            className="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400" 
+            type="email" 
+            placeholder="Email" 
+            value={email} 
+            onChange={e => setEmail(e.target.value)} 
+            required 
+            autoComplete="email" 
+          />
+          <input 
+            className="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400" 
+            type="password" 
+            placeholder="Password" 
+            value={password} 
+            onChange={e => setPassword(e.target.value)} 
+            required 
+            autoComplete="current-password" // FIX: Added autocomplete
+          />
+          <button className="bg-indigo-600 text-white p-3 rounded-lg font-bold hover:bg-indigo-700 transition" type="submit">
+            Login
+          </button>
         </form>
-        <p className="mt-4 text-center text-gray-600">
-          New here? <Link to="/signup" className="text-indigo-500 font-semibold hover:underline">Create Account</Link>
+        <p className="text-center mt-4 text-gray-500">
+          Don't have an account?{" "}
+          <Link to="/signup" className="text-indigo-600 font-bold hover:underline">
+            Sign Up
+          </Link>
         </p>
       </div>
     </div>

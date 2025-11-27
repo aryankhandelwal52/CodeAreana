@@ -86,13 +86,11 @@ export default function Contest({ roomId, username }) {
   return (
     <div className="max-w-7xl mx-auto my-10 p-6 border rounded-xl shadow-2xl bg-white flex flex-col gap-6">
       
-      {/* 🛑 FIX: Kept the Arena ID for context, removed duplicate username/logout */}
+      
       <div className="flex justify-between items-center bg-gray-50 p-4 border-b border-gray-200 rounded-t-xl -mx-6 -mt-6">
         <h2 className="text-2xl font-extrabold text-gray-700 ml-4">Arena: {roomId}</h2>
-        {/* The duplicate username/logout section was removed from here. */}
       </div>
-      
-      {/* Timer (Visibility Fixed: high contrast background) */}
+    
       {contestStarted && (
         <div className={`text-3xl font-mono font-bold text-center p-3 rounded-lg ${
           contestTimeLeft < 300 ? "bg-red-100 text-red-600 animate-pulse" : "bg-indigo-600 text-white"
@@ -102,7 +100,6 @@ export default function Contest({ roomId, username }) {
         </div>
       )}
 
-      {/* Notification */}
       {notification && (
         <div className="bg-yellow-300 text-yellow-900 px-4 py-2 rounded font-bold text-center animate-bounce">
           🔔 {notification}
@@ -110,7 +107,6 @@ export default function Contest({ roomId, username }) {
       )}
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-auto">
-        {/* Left: Problem Statement (Fixed with Prose and dark examples) */}
         <div className="overflow-y-auto pr-2">
           <div className="bg-blue-50 border border-blue-200 rounded-xl p-6 shadow-lg">
             <h2 className="text-2xl font-bold text-blue-900 mb-4 border-b pb-2">
@@ -120,7 +116,7 @@ export default function Contest({ roomId, username }) {
             <div className="prose max-w-none text-gray-800 leading-relaxed">
               <ReactMarkdown 
                  components={{
-                   // Ensures examples (code blocks) are visible (dark background, light text)
+                  
                    pre: ({ children }) => (
                      <pre className="bg-gray-800 text-gray-200 p-3 rounded-lg overflow-x-auto text-sm my-4">
                        {children}
@@ -134,7 +130,6 @@ export default function Contest({ roomId, username }) {
           </div>
         </div>
 
-        {/* Right: Code Editor */}
         <div className="flex flex-col h-full">
           <CodeEditor
             key={userProblem}
@@ -148,7 +143,6 @@ export default function Contest({ roomId, username }) {
         </div>
       </div>
 
-      {/* Leaderboard */}
       <div className="mt-4">
         <Leaderboard players={players} currentUser={username} compact={false} />
       </div>

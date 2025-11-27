@@ -65,8 +65,6 @@ export default function Lobby({ roomId, username, onStart }) {
       </div>
     );
   }
-
-  // --- Waiting Lobby ---
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-linear-to-br from-indigo-600 to-purple-700 text-white font-sans">
       <div className="bg-white/10 backdrop-blur-md p-10 rounded-3xl shadow-2xl w-full max-w-lg text-center border border-white/20">

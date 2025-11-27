@@ -3,7 +3,6 @@ import React from "react";
 export default function ContestsPage({ setRoomId, onJoin }) {
   
   const createPrivateRoom = () => {
-    // Generate a random room ID
     const randomId = "arena-" + Math.random().toString(36).substr(2, 6);
     setRoomId(randomId);
     onJoin(); 
@@ -19,7 +18,7 @@ export default function ContestsPage({ setRoomId, onJoin }) {
       <h1 className="text-4xl font-extrabold text-indigo-800 mb-10">🏆 CodeArena Contests</h1>
 
       <div className="grid md:grid-cols-2 gap-8 max-w-4xl w-full">
-        {/* Create Room Card */}
+
         <div className="bg-white p-8 rounded-xl shadow-lg border border-indigo-100 flex flex-col items-center text-center hover:shadow-2xl transition">
           <div className="text-6xl mb-4">🏠</div>
           <h2 className="text-2xl font-bold mb-2">Private Room</h2>
@@ -32,7 +31,7 @@ export default function ContestsPage({ setRoomId, onJoin }) {
           </button>
         </div>
 
-        {/* Join Public/Existing Card */}
+        
         <div className="bg-white p-8 rounded-xl shadow-lg border border-green-100 flex flex-col items-center text-center hover:shadow-2xl transition">
           <div className="text-6xl mb-4">🌍</div>
           <h2 className="text-2xl font-bold mb-2">Public Arena</h2>

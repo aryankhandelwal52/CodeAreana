@@ -14,11 +14,11 @@ export default function Leaderboard({ players, currentUser, compact = false }) {
   const getMedal = (rank) => {
     switch (rank) {
       case 1:
-        return "🥇"; // Fixed: Gold Medal
+        return "🥇";
       case 2:
-        return "🥈"; // Fixed: Silver Medal
+        return "🥈";
       case 3:
-        return "🥉"; // Fixed: Bronze Medal
+        return "🥉";
       default:
         return `#${rank}`;
     }
