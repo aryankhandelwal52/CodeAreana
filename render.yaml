@@ -1,18 +1,26 @@
-# File: render.yaml
-# Defines the services for the entire application, including the static site
-# and the backend API, and ensures correct routing for the frontend.
-
-# Static Site Configuration (Frontend)
 services:
-- type: static
-  name: codeareana-app
-  buildCommand: "npm install && npm run build"
-  staticPublishPath: client/dist
-  envVars:
-    - key: NODE_VERSION
-      value: "18.17.1"
-  # CRITICAL: Routing rule for React Router (SPA) Fallback
-  routes:
-    - type: rewrite
-      source: /
-      destination: /index.html
+  # FRONTEND: React (Vite) Static Site
+  - type: static
+    name: codeareana-app
+    rootDir: client
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist
+    envVars:
+      - key: NODE_VERSION
+        value: "18.17.1"
+    routes:
+      - type: rewrite
+        source: "/*"
+        destination: "/index.html"
+
+  # BACKEND: Node/Express Server
+  - type: web
+    name: codeareana-backend
+    rootDir: backend
+    buildCommand: npm install
+    startCommand: node index.js
+    envVars:
+      - key: NODE_VERSION
+        value: "18.17.1"
+      - key: PORT
+        value: "10000"
