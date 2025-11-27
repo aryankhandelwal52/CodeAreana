@@ -15,6 +15,7 @@ services:
   - type: web
     name: codeareana-backend
     rootDir: backend
+    runtime: node
     buildCommand: npm install
     startCommand: node index.js
     envVars:
