@@ -1,13 +1,13 @@
-// src/socket.js (Updated for Local Testing)
+// src/socket.js
 
 import { io } from "socket.io-client";
 
-// IMPORTANT: This must be changed to your Render Backend URL (e.g., https://code-arena-api.onrender.com)
-// ONLY AFTER you have deployed the backend.
+// CRITICAL: This must be the live URL of your Render Web Service.
+// This is correctly set to your live deployment domain.
 const RENDER_BACKEND_URL = "https://code-arena-api1.onrender.com"; 
 
 export const socket = io(RENDER_BACKEND_URL, {
   autoConnect: false,
-  // Added transports for robustness, though not strictly needed for localhost
+  // Added transports for robustness, as recommended for Socket.IO deployment
   transports: ['websocket', 'polling'] 
 });
