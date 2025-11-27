@@ -13,17 +13,16 @@ const app = express();
 app.use(express.json());
 app.use(
   cors({
-    origin: process.env.CLIENT_URL || "*",
+    origin: "https://codeareana2.onrender.com" || "*",
     methods: ["GET", "POST"],
     credentials: true,
   })
 );
 
-// --- MONGODB CONNECTION ---
 mongoose
   .connect(process.env.MONGO_URL)
-  .then(() => console.log("✅ MongoDB Connected"))
-  .catch((err) => console.error("❌ DB Connection Error:", err));
+  .then(() => console.log("MongoDB Connected"))
+  .catch((err) => console.error(" DB Connection Error:", err));
 
 // --- USER MODEL ---
 const userSchema = new mongoose.Schema({
@@ -32,8 +31,6 @@ const userSchema = new mongoose.Schema({
   password: { type: String, required: true },
 });
 const User = mongoose.model("User", userSchema);
-
-// --- AUTH ROUTES ---
 app.post("/register", async (req, res) => {
   try {
     const { username, email, password } = req.body;
@@ -67,7 +64,6 @@ app.post("/login", async (req, res) => {
   }
 });
 
-// --- SOCKET SERVER ---
 const server = createServer(app);
 const io = new Server(server, {
   cors: { origin: process.env.CLIENT_URL || "*", methods: ["GET", "POST"] },
@@ -75,12 +71,10 @@ const io = new Server(server, {
 
 const rooms = {};
 const MAX_PLAYERS = 3;
-const CONTEST_DURATION = 45 * 60 * 1000; // 45 Minutes
+const CONTEST_DURATION = 45 * 60 * 1000;
 
 io.on("connection", (socket) => {
   console.log("User connected:", socket.id);
-
-  // JOIN ROOM
   socket.on("join-room", ({ roomId, username }) => {
     socket.join(roomId);
 
@@ -93,8 +87,6 @@ io.on("connection", (socket) => {
     }
 
     const room = rooms[roomId];
-
-    // Prevent duplicate username in same room
     const existingUser = room.users.find((u) => u.username === username);
     if (!existingUser) {
       if (room.users.length >= MAX_PLAYERS) {
@@ -108,13 +100,10 @@ io.on("connection", (socket) => {
         problemIndex: 0,
       });
     } else {
-      // Reconnect logic: update socket ID
       existingUser.id = socket.id;
     }
 
     io.to(roomId).emit("room-users", room.users);
-
-    // If contest is already running, send current state
     if (room.contestStarted) {
       const remainingTime = CONTEST_DURATION - (Date.now() - room.contestStartTime);
       socket.emit("contest-started", {
@@ -124,7 +113,6 @@ io.on("connection", (socket) => {
     }
   });
 
-  // START CONTEST (Wait 10s -> Start 45m Timer)
   socket.on("start-contest", (roomId) => {
     const room = rooms[roomId];
     if (!room) return;
@@ -136,13 +124,9 @@ io.on("connection", (socket) => {
 
     if (room.contestStarted) return;
 
-    // Reset scores
+    
     room.users = room.users.map((u) => ({ ...u, score: 0, problemIndex: 0 }));
-
-    // 1. Notify clients to show Instructions
     io.to(roomId).emit("instruction-phase", true);
-
-    // 2. Countdown 10 seconds on server
     let countdown = 10;
     const interval = setInterval(() => {
       io.to(roomId).emit("contest-countdown", countdown);
@@ -151,7 +135,6 @@ io.on("connection", (socket) => {
       if (countdown < 0) {
         clearInterval(interval);
         
-        // 3. Start Actual Contest
         room.contestStarted = true;
         room.contestStartTime = Date.now();
         
@@ -159,8 +142,6 @@ io.on("connection", (socket) => {
           remainingTime: CONTEST_DURATION,
           users: room.users,
         });
-
-        // 4. Set Timeout for End Game
         setTimeout(() => {
           io.to(roomId).emit("contest-ended", room.users);
           room.contestStarted = false;
@@ -169,7 +150,7 @@ io.on("connection", (socket) => {
     }, 1000);
   });
 
-  // PROBLEM SOLVED
+
   socket.on("problem-solved", (roomId, username, points) => {
     const room = rooms[roomId];
     if (!room || !room.contestStarted) return;
@@ -190,8 +171,7 @@ io.on("connection", (socket) => {
   });
 
   socket.on("disconnect", () => {
-    // We keep the user in the room object in case they reconnect
-    // But you could remove them if you prefer
+
   });
 });
 const PORT = process.env.PORT || 5000;

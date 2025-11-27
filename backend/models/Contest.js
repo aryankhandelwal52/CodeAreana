@@ -6,7 +6,7 @@ const contestSchema=new mongoose.Schema({
     testCases: [{ input: String, output: String }],
     points: Number 
   }],
-  duration: Number,  // in minutes
+  duration: Number,
   createdBy: String,
   active: { type: Boolean, default: true }
 },{ timestamps: true });
