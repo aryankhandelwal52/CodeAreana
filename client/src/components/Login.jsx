@@ -7,7 +7,7 @@ export default function Login({ setUser }) {
   const navigate = useNavigate();
   
   // Use localhost for local testing.
-  const BACKEND_URL = "http://localhost:5000";
+  const BACKEND_URL = "https://code-arena-api1.onrender.com";
 
   const handleLogin = async (e) => {
     e.preventDefault();

@@ -7,7 +7,7 @@ export default function Signup() {
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
   // Using localhost for local testing. Change to your live Render API URL after deployment.
-  const BACKEND_URL = "http://localhost:5000";
+  const BACKEND_URL = "https://code-arena-api1.onrender.com";
 
   const handleSignup = async (e) => {
     e.preventDefault();
