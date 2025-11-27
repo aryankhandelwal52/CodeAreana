@@ -1,13 +1,11 @@
 services:
   # FRONTEND: React (Vite) Static Site
-  - type: static
+  - type: web
     name: codeareana-app
     rootDir: client
+    env: static
     buildCommand: npm install && npm run build
     staticPublishPath: dist
-    envVars:
-      - key: NODE_VERSION
-        value: "18.17.1"
     routes:
       - type: rewrite
         source: "/*"
