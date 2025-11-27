@@ -1,129 +1,122 @@
 import React, { useState, useEffect } from "react";
 import { socket } from "../socket";
 
-export default function Lobby({ roomId, setRoomId, setUsername, onStart }) {
-  const [localName, setLocalName] = useState("");
+export default function Lobby({ roomId, username, onStart }) {
   const [players, setPlayers] = useState([]);
-  const [joined, setJoined] = useState(false);
   const [countdown, setCountdown] = useState(null);
-  const [error, setError] = useState(""); // Existing error state
+  const [instructionMode, setInstructionMode] = useState(false);
+  const [error, setError] = useState("");
 
   useEffect(() => {
-    socket.on("contest-countdown", (time) => setCountdown(time));
-    socket.on("room-users", (users) => {
-      setPlayers(users.map((u) => u.username));
-      // Clear error on successful user list update
-      if (users.length > 0) setError("");
-    });
+    socket.connect();
+    socket.emit("join-room", { roomId, username });
+
+    socket.on("room-users", (users) => setPlayers(users));
     
-    // Assuming onStart handles the navigation/state change to Contest
-    socket.on("contest-started", () => onStart()); 
+    // Server triggers this when Admin clicks Start
+    socket.on("instruction-phase", () => setInstructionMode(true));
+    
+    // Updates the 10s countdown
+    socket.on("contest-countdown", (time) => setCountdown(time));
+    
+    // Actual game start
+    socket.on("contest-started", () => onStart());
 
     socket.on("error-message", (msg) => {
       setError(msg);
-      // Clear error after 4 seconds
-      setTimeout(() => setError(""), 4000); 
+      setTimeout(() => setError(""), 3000);
     });
 
     return () => {
-      socket.off("contest-countdown");
       socket.off("room-users");
+      socket.off("instruction-phase");
+      socket.off("contest-countdown");
       socket.off("contest-started");
       socket.off("error-message");
     };
-  }, [onStart]);
+  }, [roomId, username, onStart]);
 
-  const joinRoom = () => {
-    // FIX: Replaced alert() with setError()
-    if (!localName.trim()) {
-        setError("Enter your name to join the room.");
-        setTimeout(() => setError(""), 4000); // Clear error after 4 seconds
-        return;
-    }
-    setError(""); // Clear previous errors
-    socket.connect();
-    socket.emit("join-room", { roomId, username: localName });
-    setUsername(localName);
-    setJoined(true);
+  const handleStart = () => {
+    socket.emit("start-contest", roomId);
   };
 
-  const startContest = () => socket.emit("start-contest", roomId);
+  const copyLink = () => {
+    const url = `${window.location.origin}/?room=${roomId}`;
+    navigator.clipboard.writeText(url);
+    alert("Room link copied!");
+  };
 
-  return (
-    <div 
-      className="flex items-center justify-center min-h-screen p-6" 
-      style={{ backgroundImage: "linear-gradient(135deg, #1f2937 0%, #0f172a 100%)" }}
-    >
-      <div className="bg-gray-800 p-8 rounded-xl shadow-2xl max-w-lg w-full text-white">
-        <h1 className="text-4xl font-extrabold text-center mb-6 text-indigo-400">
-          Contest Lobby: {roomId}
+  // --- 10 Second Instruction Screen ---
+  if (instructionMode) {
+    return (
+      <div className="flex flex-col items-center justify-center h-screen bg-indigo-900 text-white p-6 text-center">
+        <h1 className="text-5xl font-extrabold mb-4 text-yellow-400 animate-pulse">
+          Starting in {countdown}...
         </h1>
+        <div className="bg-white/10 p-8 rounded-xl backdrop-blur-lg max-w-2xl w-full border border-white/20">
+          <h2 className="text-3xl font-bold mb-6 border-b border-white/20 pb-4">📜 Instructions</h2>
+          <ul className="text-left space-y-4 text-xl">
+            <li>⏱️ You have <strong>45 minutes</strong> to solve problems.</li>
+            <li>🚀 <strong>Speed matters!</strong> First to solve gets ahead.</li>
+            <li>🥇 Leaderboard updates <strong>live</strong>.</li>
+            <li>❌ Do <strong>NOT</strong> refresh the page.</li>
+          </ul>
+        </div>
+      </div>
+    );
+  }
+  return (
+    <div className="flex flex-col items-center justify-center min-h-screen bg-linear-to-br from-indigo-600 to-purple-700 text-white font-sans">
+      <div className="bg-white/10 backdrop-blur-md p-10 rounded-3xl shadow-2xl w-full max-w-lg text-center border border-white/20">
+        <h2 className="text-4xl font-extrabold mb-2">Lobby</h2>
+        <div className="inline-block bg-black/30 px-4 py-1 rounded-full text-sm font-mono mb-8">
+          ID: {roomId}
+        </div>
 
-        {error && (
-            <p className="bg-red-900 text-red-300 p-3 rounded-lg text-center mb-4 border border-red-700">
-                {error}
-            </p>
-        )}
+        {error && <div className="bg-red-500 text-white p-2 rounded mb-4 font-bold">{error}</div>}
 
-        {!joined ? (
-          <div className="flex flex-col gap-4">
-            <input
-              className="p-3 rounded-lg bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              placeholder="Enter your name"
-              value={localName}
-              onChange={(e) => setLocalName(e.target.value)}
-            />
-            <button
-              onClick={joinRoom}
-              className="bg-indigo-600 text-white p-3 rounded-lg font-bold hover:bg-indigo-700 transition duration-300"
-            >
-              Join Room
-            </button>
+        <div className="mb-8 text-left">
+          <div className="flex justify-between items-end mb-2">
+            <h3 className="text-xl font-bold text-indigo-200">Players</h3>
+            <span className="text-sm bg-indigo-500 px-2 rounded">{players.length}/3</span>
           </div>
-        ) : (
-          <div>
-            <p className="text-center text-lg mb-4 text-indigo-300">
-              Logged in as: <span className="font-semibold text-white">{localName}</span>
-            </p>
+          <ul className="space-y-2">
+            {players.map((p, i) => (
+              <li key={i} className="flex items-center bg-white/10 p-3 rounded-lg border border-white/5">
+                <span className="w-8 h-8 flex items-center justify-center bg-indigo-500 rounded-full mr-3 font-bold text-sm">
+                  {i + 1}
+                </span>
+                <span className="font-medium text-lg">{p.username}</span>
+                {p.username === username && (
+                  <span className="ml-auto text-xs bg-yellow-400 text-black px-2 py-1 rounded font-bold">YOU</span>
+                )}
+              </li>
+            ))}
+          </ul>
+        </div>
 
-            <h2 className="text-2xl font-bold mb-3 text-indigo-400 border-b border-indigo-700 pb-2">
-              Players ({players.length})
-            </h2>
-            <ul className="space-y-2 mb-6">
-              {players.map((p, i) => (
-                <li
-                  key={i}
-                  className="p-2 bg-gray-700 rounded-lg flex items-center"
-                >
-                  <span className="text-xl mr-3 font-mono text-indigo-300 w-6 text-center">{i + 1}.</span>
-                  <span className="font-medium">{p}</span>
-                  {p === localName && (
-                    <span className="ml-auto text-xs font-semibold text-green-400 bg-gray-600 px-2 py-0.5 rounded-full">YOU</span>
-                  )}
-                </li>
-              ))}
-            </ul>
-
-            {players.length >= 2 ? (
-              <button
-                onClick={startContest}
-                className="w-full bg-green-600 text-white p-3 rounded-lg font-bold text-lg hover:bg-green-700 transition duration-300 shadow-lg"
-              >
-                🚀 Start Contest
-              </button>
-            ) : (
-              <p className="text-yellow-400 text-center text-lg mt-4">
-                Waiting for at least 2 players to join...
-              </p>
-            )}
-            
-            {countdown !== null && countdown > 0 && (
-                <p className="text-xl font-bold text-yellow-300 text-center mt-4">
-                    Contest starting in {countdown}s...
-                </p>
-            )}
-
-          </div>
+        <div className="flex gap-4 flex-col sm:flex-row">
+          <button 
+            onClick={copyLink} 
+            className="flex-1 bg-blue-500 hover:bg-blue-600 py-3 rounded-xl font-bold transition shadow-lg"
+          >
+            🔗 Invite Friend
+          </button>
+          
+          <button 
+            onClick={handleStart} 
+            disabled={players.length < 2}
+            className={`flex-1 py-3 rounded-xl font-bold transition shadow-lg ${
+              players.length < 2 
+              ? "bg-gray-500 cursor-not-allowed opacity-50" 
+              : "bg-green-500 hover:bg-green-600 transform hover:scale-105"
+            }`}
+          >
+            🚀 Start Contest
+          </button>
+        </div>
+        {players.length < 2 && (
+          <p className="mt-4 text-sm text-gray-300">Waiting for at least 2 players...</p>
         )}
       </div>
     </div>
